@@ -1,6 +1,7 @@
 = Parameters
 
-The parent key for all of the following parameters is `splunk_operator`.
+The parent key for all of the following parameters is `splunk-operator`.
+
 
 == `namespace`
 
@@ -11,9 +12,114 @@ default:: `syn-splunk-operator`
 The namespace in which to deploy this component.
 
 
+== `channel`
+
+[horizontal]
+type:: string
+default:: `stable`
+
+Channel of the operator subscription to use.
+
+
+== `operatorResources.splunk`
+
+[horizontal]
+type:: dictionary
+default:: see `defaults.yml`
+
+A dictionary holding the `.spec.config.resources` for OLM subscriptions maintained by this component.
+
+
+== `instances`
+
+[horizontal]
+type:: dictionary
+default:: `{}`
+example::
++
+[source]
+----
+splunk_operator:
+  instances:
+    my-namespace/my-instance: {}
+----
+
+A dictionary defining namespaced Splunk resources.
+
+=== `instances.{}.standalone`
+
+[horizontal]
+type:: dictionary
+example::
++
+[source]
+----
+splunk_operator:
+  instances:
+    my-namespace/my-instance:
+        standalone:
+          serviceAccount: my-serviceaccount
+----
+
+Defines the spec of a Splunk `Standalone` resource. See https://splunk.github.io/splunk-operator/Examples.html#using-default-settings[Splunk Operator Documentation] for more details.
+
+Also creates the RoleBinding and ServiceAccount for the `Standalone` resource.
+
+
+=== `instances.{}.appConfigs`
+
+[horizontal]
+type:: dictionary
+example::
++
+[source]
+----
+splunk_operator:
+  instances:
+    my-namespace/my-instance:
+      appConfigs:
+        test1:
+          my-app1.tgz: ... <1>
+          my-app2.tgz: ...
+        test2:
+          other-app.tgz: ...
+      standalone:
+        defaults: |
+          splunk:
+            apps_location:
+              - /mnt/test1/my-app1.tgz <2>
+              - /mnt/test1/my-app2.tgz
+              - /mnt/test2/other-app.tgz
+----
+<1> A Base64 encoded app configuration.
+<2> The configured appConfigs will be mounted as volumes in `/mnt`.
+
+Creates `Secrets` containing the Base64 encoded apps and mounts them as volumes in Splunks `Standalone` resource.
+
+
 == Example
 
-[source,yaml]
+[source]
 ----
-namespace: example-namespace
+splunk_operator:
+  instances:
+    test1/heavyforwarder:
+      appConfigs:
+        test1:
+          my-app.tgz: "BINARY_DATA"
+      standalone:
+        serviceAccount: splunk-forwarder
+        defaults: |
+          splunk:
+            role: splunk_heavy_forwarder
+            admin_user: splunk-admin
+            password: supersecret
+            apps_location:
+              - /mnt/test1/my-app.tgz
+            hec:
+              enable: true
+            s2s:
+              enable: false
+            ssl:
+              enable: false
 ----

@@ -9,3 +9,28 @@ parameters:
     defaultInstallPlanApproval: Automatic
     defaultSource: openshift-operators-redhat
     defaultSourceNamespace: openshift-operators-redhat
+
+  splunk_operator:
+    instances:
+      test1/heavyforwarder:
+        standalone:
+          serviceAccount: splunk-forwarder
+      test2/heavyforwarder:
+        appConfigs:
+          test1:
+            my-app.tgz: "BINARY_DATA"
+        standalone:
+          serviceAccount: splunk-forwarder
+          defaults: |
+            splunk:
+              role: splunk_heavy_forwarder
+              admin_user: splunk-admin
+              password: supersecret
+              apps_location:
+                - /mnt/test1/my-app.tgz
+              hec:
+                enable: true
+              s2s:
+                enable: false
+              ssl:
+                enable: false

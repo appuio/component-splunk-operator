@@ -1,0 +1,93 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: '-50'
+    syn.tools/source: https://github.com/projectsyn/component-splunk-operator.git
+  labels:
+    app.kubernetes.io/component: splunk
+    app.kubernetes.io/instance: heavyforwarder
+    app.kubernetes.io/managed-by: commodore
+    app.kubernetes.io/part-of: syn
+  name: test2
+---
+apiVersion: enterprise.splunk.com/v4
+kind: Standalone
+metadata:
+  annotations:
+    syn.tools/source: https://github.com/projectsyn/component-splunk-operator.git
+  labels:
+    app.kubernetes.io/component: splunk
+    app.kubernetes.io/instance: heavyforwarder
+    app.kubernetes.io/managed-by: commodore
+    app.kubernetes.io/part-of: syn
+  name: heavyforwarder
+spec:
+  defaults: |
+    splunk:
+      role: splunk_heavy_forwarder
+      admin_user: splunk-admin
+      password: supersecret
+      apps_location:
+        - /mnt/test1/my-app.tgz
+      hec:
+        enable: true
+      s2s:
+        enable: false
+      ssl:
+        enable: false
+  serviceAccount: splunk-forwarder
+  volumes:
+    - name: test1
+      secret:
+        secretName: splunk-appconfig-test1
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations:
+    syn.tools/source: https://github.com/projectsyn/component-splunk-operator.git
+  labels:
+    app.kubernetes.io/component: splunk
+    app.kubernetes.io/instance: heavyforwarder
+    app.kubernetes.io/managed-by: commodore
+    app.kubernetes.io/part-of: syn
+  name: splunk-forwarder
+  namespace: test2
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  annotations:
+    syn.tools/source: https://github.com/projectsyn/component-splunk-operator.git
+  labels:
+    app.kubernetes.io/component: splunk
+    app.kubernetes.io/instance: heavyforwarder
+    app.kubernetes.io/managed-by: commodore
+    app.kubernetes.io/part-of: syn
+  name: splunk-standalone-heavyforwarder-nonroot-v2
+  namespace: test2
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:openshift:scc:nonroot-v2
+subjects:
+  - kind: ServiceAccount
+    name: splunk-forwarder
+    namespace: test2
+---
+apiVersion: v1
+data:
+  my-app.tgz: BINARY_DATA
+kind: Secret
+metadata:
+  annotations:
+    syn.tools/source: https://github.com/projectsyn/component-splunk-operator.git
+  labels:
+    app.kubernetes.io/component: splunk
+    app.kubernetes.io/instance: heavyforwarder
+    app.kubernetes.io/managed-by: commodore
+    app.kubernetes.io/part-of: syn
+  name: splunk-appconfig-test1
+  namespace: test2
+type: Opaque
