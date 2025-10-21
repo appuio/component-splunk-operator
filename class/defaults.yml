@@ -1,0 +1,5 @@
+parameters:
+  splunk_operator:
+    =_metadata:
+      multi_tenant: true
+    namespace: syn-splunk-operator
