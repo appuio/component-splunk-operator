@@ -13,6 +13,7 @@ parameters:
   splunk_operator:
     instances:
       test1/heavyforwarder:
+        createNamespace: true
         standalone:
           serviceAccount: splunk-forwarder
       test2/heavyforwarder:

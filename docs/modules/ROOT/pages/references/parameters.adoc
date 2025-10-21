@@ -65,7 +65,6 @@ Defines the spec of a Splunk `Standalone` resource. See https://splunk.github.io
 
 Also creates the RoleBinding and ServiceAccount for the `Standalone` resource.
 
-
 === `instances.{}.appConfigs`
 
 [horizontal]
@@ -95,6 +94,23 @@ splunk_operator:
 <2> The configured appConfigs will be mounted as volumes in `/mnt`.
 
 Creates `Secrets` containing the Base64 encoded apps and mounts them as volumes in Splunks `Standalone` resource.
+
+=== `instances.{}.createNamespace`
+
+[horizontal]
+type:: boolean
+default:: `false`
+example::
++
+[source]
+----
+splunk_operator:
+  instances:
+    my-namespace/my-instance:
+      createNamespace: true
+----
+
+Creates the `Namespace` for the Splunk instance.
 
 
 == Example

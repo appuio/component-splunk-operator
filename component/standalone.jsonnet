@@ -94,20 +94,6 @@ local standalone(instance) = std.foldl(
 //   roleBinding(instanceName),
 // ];
 
-// Namespace
-
-local namespace(instance) = {
-  apiVersion: 'v1',
-  kind: 'Namespace',
-  metadata: {
-    annotations: {
-      'argocd.argoproj.io/sync-wave': '-50',
-    } + utils.commonAnnotations,
-    labels: utils.commonLabelsWithInstance(namespacedName(instance).name),
-    name: namespacedName(instance).namespace,
-  },
-};
-
 // RABC
 
 local serviceAccount(instance) = {
@@ -144,14 +130,29 @@ local roleBinding(instance) = {
   ],
 };
 
+// Namespace
+
+local namespace(instance) = if std.get(params.instances[instance], 'createNamespace', false) then {
+  apiVersion: 'v1',
+  kind: 'Namespace',
+  metadata: {
+    annotations: {
+      'argocd.argoproj.io/sync-wave': '-50',
+    } + utils.commonAnnotations,
+    labels: utils.commonLabelsWithInstance(namespacedName(instance).name),
+    name: namespacedName(instance).namespace,
+  },
+};
+
 // Define outputs below
 {
-  [if std.length(params.instances) > 0 then '50_standalone_%s' % std.strReplace(instance, '/', '_')]: [
-    namespace(instance),
-    standalone(instance),
-    serviceAccount(instance),
-    roleBinding(instance),
-  ] + appConfigs(instance)
+  [if std.length(params.instances) > 0 then '50_instance_%s' % std.strReplace(instance, '/', '_')]:
+    std.filter(function(x) x != null, [
+      namespace(instance),
+      standalone(instance),
+      serviceAccount(instance),
+      roleBinding(instance),
+    ] + appConfigs(instance))
   for instance in std.objectFields(params.instances)
   if params.instances[instance] != null
 }
