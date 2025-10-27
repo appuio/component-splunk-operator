@@ -9,6 +9,7 @@ metadata:
     app.kubernetes.io/managed-by: commodore
     app.kubernetes.io/part-of: syn
   name: heavyforwarder
+  namespace: test2
 spec:
   defaults: |
     splunk:

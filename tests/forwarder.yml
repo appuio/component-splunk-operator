@@ -14,6 +14,7 @@ parameters:
     instances:
       test1/heavyforwarder:
         createNamespace: true
+        url: my-splunk.example.com
         standalone:
           serviceAccount: splunk-forwarder
       test2/heavyforwarder:

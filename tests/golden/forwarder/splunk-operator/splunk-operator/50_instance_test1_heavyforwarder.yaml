@@ -22,8 +22,34 @@ metadata:
     app.kubernetes.io/managed-by: commodore
     app.kubernetes.io/part-of: syn
   name: heavyforwarder
+  namespace: test1
 spec:
   serviceAccount: splunk-forwarder
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    syn.tools/source: https://github.com/projectsyn/component-splunk-operator.git
+  labels:
+    app.kubernetes.io/component: splunk
+    app.kubernetes.io/instance: heavyforwarder
+    app.kubernetes.io/managed-by: commodore
+    app.kubernetes.io/part-of: syn
+  name: splunk-heavyforwarder
+  namespace: test1
+spec:
+  rules:
+    - host: my-splunk.example.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: splunk-heavyforwarder-standalone-service
+                port:
+                  name: tcp-s2s
+            path: /
+            pathType: Prefix
 ---
 apiVersion: v1
 kind: ServiceAccount

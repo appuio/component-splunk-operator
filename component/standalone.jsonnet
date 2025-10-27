@@ -83,16 +83,44 @@ local standalone(instance) = std.foldl(
     metadata+: {
       annotations: utils.commonAnnotations,
       labels: utils.commonLabelsWithInstance(namespacedName(instance).name),
+      namespace: namespacedName(instance).namespace,
     },
   }
 );
 
-// local instance(instanceName) = [
-//   standalone(instanceName),
-//   apps(instanceName),
-//   serviceAccount(instanceName),
-//   roleBinding(instanceName),
-// ];
+local route(instance) = if std.get(params.instances[instance], 'url', '') != '' then {
+  apiVersion: 'networking.k8s.io/v1',
+  kind: 'Ingress',
+  metadata: {
+    annotations: utils.commonAnnotations,
+    labels: utils.commonLabelsWithInstance(namespacedName(instance).name),
+    name: 'splunk-%s' % namespacedName(instance).name,
+    namespace: namespacedName(instance).namespace,
+  },
+  spec: {
+    rules: [{
+      host: params.instances[instance].url,
+      http: {
+        paths: [{
+          backend: {
+            service: {
+              name: 'splunk-%s-standalone-service' % namespacedName(instance).name,
+              port: {
+                name: 'tcp-s2s',
+              },
+            },
+          },
+          path: '/',
+          pathType: 'Prefix',
+        }],
+      },
+    }],
+    // tls: [{
+    //   hosts: [ 'splunk-traffic-vshn-tdr-infra-prod.apps.ocp4.acrevison.ch' ],
+    //   secretName: '%s-tls' % namespacedName(instance).name,
+    // }]
+  }
+};
 
 // RABC
 
@@ -150,6 +178,7 @@ local namespace(instance) = if std.get(params.instances[instance], 'createNamesp
     std.filter(function(x) x != null, [
       namespace(instance),
       standalone(instance),
+      route(instance),
       serviceAccount(instance),
       roleBinding(instance),
     ] + appConfigs(instance))

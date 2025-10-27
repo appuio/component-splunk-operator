@@ -112,6 +112,23 @@ splunk_operator:
 
 Creates the `Namespace` for the Splunk instance.
 
+=== `instances.{}.url`
+
+[horizontal]
+type:: string
+default:: ``
+example::
++
+[source]
+----
+splunk_operator:
+  instances:
+    my-namespace/my-instance:
+      url: my-forwarder.example.com
+----
+
+Creates an `Ingress` for the `Standalone` instance.
+
 
 == Example
 
