@@ -1,6 +1,6 @@
 = Parameters
 
-The parent key for all of the following parameters is `splunk-operator`.
+The parent key for all of the following parameters is `splunk_operator`.
 
 
 == `namespace`

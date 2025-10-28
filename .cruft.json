@@ -21,9 +21,9 @@
       "auto_release": "y",
       "copyright_holder": "VSHN AG <info@vshn.ch>",
       "copyright_year": "2025",
-      "github_owner": "projectsyn",
+      "github_owner": "appuio",
       "github_name": "component-splunk-operator",
-      "github_url": "https://github.com/projectsyn/component-splunk-operator",
+      "github_url": "https://github.com/appuio/component-splunk-operator",
       "_template": "https://github.com/projectsyn/commodore-component-template.git",
       "_commit": "84a7c63ca26492da555344c23ccddac302ba0bb2"
     }
