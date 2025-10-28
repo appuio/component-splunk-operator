@@ -2,4 +2,23 @@ parameters:
   splunk_operator:
     =_metadata:
       multi_tenant: true
+
     namespace: syn-splunk-operator
+
+    channel: 'stable'
+
+    images:
+      splunk:
+        registry: docker.io
+        repository: splunk/splunk
+        tag: '10.0'
+
+    operatorResources:
+      splunk:
+        requests:
+          memory: 64Mi
+          cpu: 10m
+        limits:
+          memory: 512Mi
+
+    instances: {}

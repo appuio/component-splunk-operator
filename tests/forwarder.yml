@@ -1,3 +1,38 @@
-# Overwrite parameters here
+parameters:
+  kapitan:
+    dependencies:
+      - type: https
+        source: https://raw.githubusercontent.com/appuio/component-openshift4-operators/v1.0.2/lib/openshift4-operators.libsonnet
+        output_path: vendor/lib/openshift4-operators.libsonnet
 
-# parameters: {...}
+  openshift4_operators:
+    defaultInstallPlanApproval: Automatic
+    defaultSource: openshift-operators-redhat
+    defaultSourceNamespace: openshift-operators-redhat
+
+  splunk_operator:
+    instances:
+      test1/heavyforwarder:
+        createNamespace: true
+        url: my-splunk.example.com
+        standalone:
+          serviceAccount: splunk-forwarder
+      test2/heavyforwarder:
+        appConfigs:
+          test1:
+            my-app.tgz: "BINARY_DATA"
+        standalone:
+          serviceAccount: splunk-forwarder
+          defaults: |
+            splunk:
+              role: splunk_heavy_forwarder
+              admin_user: splunk-admin
+              password: supersecret
+              apps_location:
+                - /mnt/test1/my-app.tgz
+              hec:
+                enable: true
+              s2s:
+                enable: false
+              ssl:
+                enable: false
