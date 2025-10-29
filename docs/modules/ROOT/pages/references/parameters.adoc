@@ -112,6 +112,24 @@ splunk_operator:
 
 Creates the `Namespace` for the Splunk instance.
 
+=== `instances.{}.allowFrom`
+
+[horizontal]
+type:: list
+default:: []
+example::
++
+[source]
+----
+splunk_operator:
+  instances:
+    my-namespace/my-instance:
+      allowFrom:
+        - openshift-logging
+----
+
+Creates a `NetworkPolicy` allowing ingress from listed namespaces.
+
 === `instances.{}.url`
 
 [horizontal]
