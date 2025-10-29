@@ -98,10 +98,10 @@ local route(instance) = if std.get(params.instances[instance], 'url', '') != '' 
     namespace: namespacedName(instance).namespace,
   },
   spec: {
-    rules: [{
+    rules: [ {
       host: params.instances[instance].url,
       http: {
-        paths: [{
+        paths: [ {
           backend: {
             service: {
               name: 'splunk-%s-standalone-service' % namespacedName(instance).name,
@@ -112,14 +112,42 @@ local route(instance) = if std.get(params.instances[instance], 'url', '') != '' 
           },
           path: '/',
           pathType: 'Prefix',
-        }],
+        } ],
       },
-    }],
+    } ],
     // tls: [{
     //   hosts: [ 'splunk-traffic-vshn-tdr-infra-prod.apps.ocp4.acrevison.ch' ],
     //   secretName: '%s-tls' % namespacedName(instance).name,
     // }]
-  }
+  },
+};
+
+local netpol(instance) = if std.get(params.instances[instance], 'allowFrom', []) != [] then {
+  apiVersion: 'networking.k8s.io/v1',
+  kind: 'NetworkPolicy',
+  metadata: {
+    annotations: utils.commonAnnotations,
+    labels: utils.commonLabelsWithInstance(namespacedName(instance).name),
+    name: 'splunk-standalone-%s' % namespacedName(instance).name,
+    namespace: namespacedName(instance).namespace,
+  },
+  spec: {
+    podSelector: {},
+    policyTypes: [ 'Ingress' ],
+    ingress: [
+      {
+        from: [ {
+          namespaceSelector: {
+            matchExpressions: [ {
+              operator: 'In',
+              key: 'kubernetes.io/metadata.name',
+              values: params.instances[instance].allowFrom,
+            } ],
+          },
+        } ],
+      },
+    ],
+  },
 };
 
 // RABC
@@ -179,6 +207,7 @@ local namespace(instance) = if std.get(params.instances[instance], 'createNamesp
       namespace(instance),
       standalone(instance),
       route(instance),
+      netpol(instance),
       serviceAccount(instance),
       roleBinding(instance),
     ] + appConfigs(instance))
